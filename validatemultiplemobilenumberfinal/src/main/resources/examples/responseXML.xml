@@ -1,0 +1,32 @@
+<QuickCheckMultiResult xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/DNC.Rest.Models">
+<ScrubbedResults>
+<QuickCheckMultiResponse>
+<Filters>
+<FilterInfo>
+<FilterName>Wireless</FilterName>
+<Flag>WIR</Flag>
+</FilterInfo>
+<FilterInfo>
+<FilterName>Pennsylvania Wireless</FilterName>
+<Flag>WPA</Flag>
+</FilterInfo>
+<FilterInfo>
+<FilterName>Telcordia TDS Wireless All</FilterName>
+<Flag>WIR</Flag>
+</FilterInfo>
+</Filters>
+<PhoneNumber>8142033320</PhoneNumber>
+<Status>DNC</Status>
+</QuickCheckMultiResponse>
+<QuickCheckMultiResponse>
+<Filters>
+<FilterInfo>
+<FilterName>Telcordia TDS Wireless All</FilterName>
+<Flag>WIR</Flag>
+</FilterInfo>
+</Filters>
+<PhoneNumber>9493662024</PhoneNumber>
+<Status>DNC</Status>
+</QuickCheckMultiResponse>
+</ScrubbedResults>
+</QuickCheckMultiResult>

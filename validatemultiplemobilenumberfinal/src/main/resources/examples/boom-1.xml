@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<users>
+  <user baseID="1">
+    <id>10001</id>
+    <num>19</num>
+    <name>Archer</name>
+  </user>
+   <user baseID="3">
+    <id>10003</id>
+    <num>21</num>
+    <name>Pam</name>
+  </user>
+
+  <user baseID="2">
+    <id>10002</id>
+    <num>20</num>
+    <name>Cyril</name>
+  </user>
+ </users>
+ 

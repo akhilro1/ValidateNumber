@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="18e988dd-14a7-47b0-988a-144e4d5b083a" >
+		<http:request-connection host="staging.dncsolution.com" port="443" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="0eaf2ba0-df24-4d9e-96b5-354fa22a815e">
+		<http:request-connection protocol="HTTPS" host="staging.dncsolution.com" port="443" >
+			<tls:context >
+				<tls:trust-store path="MyStoreKey.jks" type="jks" />
+			</tls:context>
+		</http:request-connection>
+	</http:request-config>
+	<flow name="DncSolution" doc:id="c5a39af8-1462-4597-a649-24762d4ccc5a" >
+		<set-variable value="#[message.attributes.queryParams.number1]" doc:name="Set Variable" doc:id="1882e9d6-f6f7-43d0-9e5b-0b5c762430a6" variableName="number1"/>
+		<set-variable value="#[message.attributes.queryParams.number2]" doc:name="Set Variable" doc:id="8aef370d-21bd-4db4-8c38-5a1a98c54e5c" variableName="number2"/>
+		<http:request method="GET" doc:name="Request" doc:id="35e864a9-069b-49dc-8e33-77fc72d3bf7d" config-ref="HTTP_Request_configuration1" path="/rest/17125/Quickcheck/300409/1303?PhoneNumberList[0]={n1}&amp;PhoneNumberList[1]={n2}" sendBodyMode="AUTO">
+			<http:body ><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+   "leadPreferences":{
+      "telephones":[
+         {
+            "phoneNumber":vars.number1
+         },
+         {
+            "phoneNumber":vars.number2
+         }
+      ]
+   }
+}]]]></http:body>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"n1" : vars.number1,
+	"n2" : vars.number2
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="1307bc03-646e-4429-82cb-f584da79a2cc">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="88d043fd-51d7-4e1e-be97-72142a65e7cf" message="#[payload.any]" />
+	</flow>
+	<flow name="implementationFlow" doc:id="972b9e7e-8480-49ee-8085-997d3e19d963" >
+		<set-variable value="#[1]" doc:name="Counter" doc:id="fdd8dbc0-2248-4078-93f6-7e3aecfc8e16" variableName="Counter"/>
+		<set-payload value='#[{
+	"names":{
+		"name": "akhil",
+		"id": "123"
+	},
+	"names":{
+		"name": "charan",
+		"id": "123"
+	},
+	"names":{
+		"name": "leela",
+		"id": "123"
+	}
+	
+}]' doc:name="Set Payload" doc:id="2b56e8d5-4b9a-4646-a896-b97165669b4a" />
+		<ee:transform doc:name="Transform Message" doc:id="2c02d33d-94db-4e04-a687-328473cc3626" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload pluck $]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="2d86e4b3-8672-479e-89e2-887378348b79" message="#[payload]"/>
+		<batch:job jobName="implementationBatch_Job" doc:id="fd260635-c420-4f50-8767-869ee3f3b081" >
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="d3eae0dc-1fa4-4a78-8416-1b8d994dea13" acceptExpression="#[(payload mod 2) != 0]">
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="9819a9d2-dc9a-489c-8d9c-0e7b39983790" size="2">
+						<logger level="INFO" doc:name="Logger" doc:id="3e6cc321-f68a-48e7-b994-6106cce36528" message="#[payload]"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="7291073b-c37a-433e-bcfd-5287e78bcb09" message="#[%dw 2.0
+output application/json
+---
+{
+a:vars.Counter,
+b:vars.increment,
+c:vars.stepVar
+}]"/>
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+	<flow name="implementationFlow1" doc:id="53703ca6-6025-4195-a704-4a25ab843010" >
+		<http:listener doc:name="Listener" doc:id="2bdf63e2-cf77-460a-8ae0-d1351ed495f8" config-ref="phonenumberapi-httpListenerConfig" path="/get" />
+		<set-payload value="#[[1,2,3,4]]" doc:name="Set Payload" doc:id="fff26f6b-9601-4c08-a2aa-84597a238f40" />
+		<foreach doc:name="For Each" doc:id="1c86ab0b-b164-4169-af2a-4812bffd8014" collection="#[payload]" batchSize="2">
+			<ee:transform doc:name="Transform Message" doc:id="00b66791-96d2-4e5a-ac25-75911bbbec67">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload[0]*2]]></ee:set-payload>
+			</ee:message>
+				<ee:variables >
+				</ee:variables>
+		</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="5302004f-9138-4699-9734-72993edbf07c" message="#[payload]"/>
+		</foreach>
+		<logger level="INFO" doc:name="Logger" doc:id="f583c619-d3df-48d8-9c30-652a729949d5" message="#[payload]"/>
+	</flow>
+</mule>
