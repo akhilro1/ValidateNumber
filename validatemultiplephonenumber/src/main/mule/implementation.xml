@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="5d6fbdf3-3c43-498c-9eb5-c51f25c3fa27">
+		<http:request-connection host="staging.dncsolution.com " port="443" protocol="HTTPS">
+			<tls:context >
+				<tls:trust-store path="MyStoreKey.jks" type="jks" />
+			</tls:context>
+		</http:request-connection>
+			
+	</http:request-config>
+	<sub-flow name="RequesttoRestURL" doc:id="bc79d6dd-e721-41a5-9518-7cbc3caecbae" >
+		<http:request method="GET" doc:name="RequestToDnc" doc:id="165d94b3-8e43-4b44-be18-e05d5f069199" config-ref="HTTP_Request_configuration" path="/rest/17125/Quickcheck/300409/1303">
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	"PhoneNumberList[0]" : vars.vPhoneNumber1,
+	"PhoneNumberList[1]" : vars.vPhoneNumber2
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="LoggerAfterRequest" doc:id="79acf718-eb19-4e29-b95d-1c79d7f3bfd4" message="#[payload]" />
+	</sub-flow>
+	<flow name="Validate-multiple-phoneNumber-MainFlow" doc:id="268669ec-2cf0-4604-818b-e9a00a29fa42" >
+		<logger level="INFO" doc:name="intial Logger" doc:id="09363bc2-e339-4c7d-90c8-0a04c8394afd" message="#[payload]"/>
+		<flow-ref doc:name="Flow Reference toRequest sub Flow" doc:id="a8fbe937-cc2e-4521-aaf0-5df32aed9d87" name="RequesttoRestURL" />
+		<ee:transform doc:name="FinalPayload" doc:id="b26c68d6-f375-423f-815c-24fc0f9e0cd4">
+			<ee:message>
+				<ee:set-payload resource="finalPayload.dwl" />
+			</ee:message>
+		</ee:transform>
+		<set-payload value="last" doc:name="Set Payload" doc:id="73ad607e-1f0a-4d88-8709-8062000871b1" />
+		<logger level="INFO" doc:name="LoggerFinalPayload" doc:id="cc621307-d860-4cdf-a7c7-86636d797916" message="#[payload] #[now()]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7a7c65b8-476c-42b9-96b5-f17cb7d1b83e" type="HTTP:CONNECTIVITY, HTTP:TIMEOUT">
+				<logger level="INFO" doc:name="Logger" doc:id="5015f1bc-28c9-432c-b497-d68d8d40e27c" message="#[payload]"/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>
