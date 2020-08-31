@@ -1,0 +1,15 @@
+http:
+  host: "0.0.0.0"
+  port: "8082"
+  
+sfdc:
+  consumerKey: "![6gp9r+XhO7jHVQ2CFHHyWLXbeg6lH2KJhCcZNEAeOjMYeCnd9UZ+F7rXKOubUpiLj3psz5ArzKgzb6ukxNb0N2HcN/Uqk+UwlNYVE2osKbl44hz5Xz4DRA==]"
+  consumerSecret: "![TUCbyirlArrlBI7vFBRh73rz30ByGApVrCq31ABe3aiJvrihOfTxzPGNN7mSnArn4FJaMbbVCcc2QFreunRlsQwamg6COQoq]"
+  callbackPath: "/callback"
+  authorizePath: "/authorizem"
+  externalCallbackUrl: "http://localhost:8082/callback"
+  
+api:
+  version: "v1"
+  
+ 

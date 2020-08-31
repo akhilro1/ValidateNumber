@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	
+	
+	<sub-flow name="Create-Contact-SFDC-Subflow" doc:id="244935f0-4f70-4010-a41c-fe8c421b79cc" >
+		<salesforce:create type="Contact" doc:name="CreateContact" doc:id="323892e2-2f68-45a3-a127-226359453095" config-ref="Salesforce_Config" />
+		<logger level="INFO" doc:name="LoggerAfterSF" doc:id="3b916865-e061-467a-b742-5c0fed353206" message="#[payload]  #['\n' ++ now()]"/>
+	</sub-flow>
+	<flow name="salesforce-oauth-Main-Flow" doc:id="a66c0499-92e5-479e-bfda-7e24a004bba9" >
+		<ee:transform doc:name="JSON Transform" doc:id="7a9feb3c-aa97-4046-9586-941d895c760f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map{
+	firstName:$.firstName,
+	lastName:$.lastName,
+	email:$.email,
+	phone:$.phone
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Initial Payload Logger" doc:id="f3a62e03-31c0-4c1b-a566-5c5f3f50fdd9" message="#[payload]  #['\n' ++ now()]"/>
+		<flow-ref doc:name="Flow Reference to CraeteSalesforceContact" doc:id="ec94d251-7125-490d-9164-b53abc48de8d" name="Create-Contact-SFDC-Subflow" doc:description="calling the create contact salesforce sub flow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="97656901-3f8d-46c6-9c18-933274c1106c" message="#[now()]"/>
+		<ee:transform doc:name="sfdcID" doc:id="0e02dfe8-c701-4ec2-a39f-927e4a1b905f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload.items map{
+	sfdcid: $.id,
+	status: $.statusCode default "SUCCESSFUL"
+	
+	
+	
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="FinalPayloadLogger" doc:id="51f998ed-8b22-46d2-9f0f-e1434c2bbcb7" message="#[payload]  #['\n' ++ now()]" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2359965e-e7fb-4925-aed1-1ff3762c9053" type="SALESFORCE:CONNECTIVITY">
+				<ee:transform doc:name="Transform Message" doc:id="1d78e862-02f0-4dbb-9fab-4c9f67322739" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: error.description  ++" " ++ now()
+	
+	}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<logger level="DEBUG" doc:name="ErrorLogger" doc:id="b5d6eeca-ff42-429d-a65c-1f52c76e63dc" message="#[payload]  #['\n' ++ now()]" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

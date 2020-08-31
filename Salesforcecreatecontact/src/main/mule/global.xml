@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="3b33132d-df20-4c0c-bad9-e6ba9d64b716" >
+		<http:listener-connection host="${http.host}" port="${http.port}" />
+	</http:listener-config>
+	
+	
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="6d0dddae-9115-4ab0-8a6b-899be13ceb38" >
+		<salesforce:config-with-oauth-connection >
+			<salesforce:oauth-authorization-code consumerKey="${secure::sfdc.consumerKey}" consumerSecret="${secure::sfdc.consumerSecret}" />
+			<salesforce:oauth-callback-config listenerConfig="HTTP_Listener_config" callbackPath="${sfdc.callbackPath}" authorizePath="${sfdc.authorizePath}" externalCallbackUrl="${sfdc.externalCallbackUrl}" />
+		</salesforce:config-with-oauth-connection>
+	</salesforce:sfdc-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="77bfa79d-1b11-4950-823c-beb769bd7fd2" file="dev-config.yaml" />
+	<configuration doc:name="Configuration" doc:id="7fcadba1-da77-4fac-a56e-ad77d93d356d"  defaultErrorHandler-ref="globalError_Handler"/>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="fcea26c7-89f8-4d3d-8131-bfe6b4512f64" file="dev-config.yaml" key="123" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<error-handler name="globalError_Handler" doc:id="749d0fe5-21a1-4634-9b80-1c1690087ed8" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="35dc148d-1132-4a27-93ef-1f0dc1f6f52b" type="ANY">
+			<ee:transform doc:name="Transform Message" doc:id="a7c6e66e-769b-4b38-9a93-b00e71622bff" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: error.description ++ " " ++ now()
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="52b12c60-84eb-41d2-8588-e1a436a5d1dc" message="#[payload] #['\n' ++ &quot; &quot; ++ now() ++ &quot;time&quot;]"/>
+		</on-error-propagate>
+	</error-handler>
+	
+	
+</mule>
