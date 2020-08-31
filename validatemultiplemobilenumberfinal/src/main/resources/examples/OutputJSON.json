@@ -1,0 +1,17 @@
+{
+   "telephones":[
+      {
+         "phoneNumber":"3434343443",
+         "isStateDNC":false,
+         "isVOIP":false,
+         "isFarmersDNC":false,
+         "isNationalDNC":false,
+         "isWireless":false,
+         "filterFlags":[
+            "CNC",
+            "WIR",
+            "WJC"
+         ]
+      }
+   ]
+}

@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="PHnumExample" format="json">
+      <types:shape format="weave" example="examples/PhoneNumberExample.json"><![CDATA[%dw 2.0
+
+type PHnumExample = {| leadPreferences: {| telephone: Array<{| phoneNumber: Number {"typeId": "double"} |}> |} |} {"example": "{\\\"leadPreferences\\\":{\\\"telephone\\\":[{\\\"phoneNumber\\\":8142033320},{\\\"phoneNumber\\\":94923662024}]}}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="PhoneNumberResponseJSON" format="json">
+      <types:shape format="weave" example="examples/ValidResponeJSON-1.json"><![CDATA[%dw 2.0
+
+type PhoneNumberResponseJSON = {|
+  ScrubbedResults: Array<{|    PhoneNumber: String,     Status: String,     Filters: Array<{|      FilterName: String,       Flag: String    |}>
+  |}>
+|} {"example": "{\\\"ScrubbedResults\\\":[{\\\"PhoneNumber\\\":\\\"8142033320\\\",\\\"Status\\\":\\\"DNC\\\",\\\"Filters\\\":[{\\\"FilterName\\\":\\\"Wireless\\\",\\\"Flag\\\":\\\"WIR\\\"},{\\\"FilterName\\\":\\\"Pennsylvania Wireless\\\",\\\"Flag\\\":\\\"WPA\\\"},{\\\"FilterName\\\":\\\"Telcordia TDS Wireless All\\\",\\\"Flag\\\":\\\"WIR\\\"}]},{\\\"PhoneNumber\\\":\\\"9493662024\\\",\\\"Status\\\":\\\"DNC\\\",\\\"Filters\\\":[{\\\"FilterName\\\":\\\"Telcordia TDS Wireless All\\\",\\\"Flag\\\":\\\"WIR\\\"}]}]}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="ResponseXML" format="xml">
+      <types:example format="xml" element="{http://schemas.datacontract.org/2004/07/DNC.Rest.Models}QuickCheckMultiResult" location="examples/responseXML.xml"/>
+    </types:type>
+    <types:type name="OutputJSON" format="json">
+      <types:shape format="weave" example="examples/OutputJSON.json"><![CDATA[%dw 2.0
+
+type OutputJSON = {|
+  telephones: Array<{|    phoneNumber: String,     isStateDNC: Boolean,     isVOIP: Boolean,     isFarmersDNC: Boolean,     isNationalDNC: Boolean,     isWireless: Boolean,     filterFlags: Array<String>
+  |}>
+|} {"example": "{\\\"telephones\\\":[{\\\"phoneNumber\\\":\\\"3434343443\\\",\\\"isStateDNC\\\":false,\\\"isVOIP\\\":false,\\\"isFarmersDNC\\\":false,\\\"isNationalDNC\\\":false,\\\"isWireless\\\":false,\\\"filterFlags\\\":[\\\"CNC\\\",\\\"WIR\\\",\\\"WJC\\\"]}]}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="boom" format="xml">
+      <types:example format="xml" element="users" location="examples/boom-1.xml"/>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#c5a39af8-1462-4597-a649-24762d4ccc5a">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="PhoneNumberResponseJSON"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#1307bc03-646e-4429-82cb-f584da79a2cc">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="ResponseXML"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#f7f3cf74-ab7e-4001-a5db-dbbb451dea1f">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="OutputJSON"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#00b66791-96d2-4e5a-ac25-75911bbbec67"/>
+  <types:enrichment select="#74b46035-d6ee-4534-92ee-1672bb2ce972">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="boom"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

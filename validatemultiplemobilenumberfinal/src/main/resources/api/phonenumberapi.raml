@@ -1,0 +1,60 @@
+#%RAML 1.0
+title: PhoneNumberAPI
+mediaType: 
+  - application/json
+
+types:
+  numberValid:
+        type: string
+        minLength: 10
+        maxLength: 10
+        pattern: "[3-9][0-9]+"
+       
+          
+  PhoneDatatype: !include /Dataype/datatype.raml
+  
+/phonenumber:
+  get:
+    queryParameters:
+      number1:
+        required: true
+        type: numberValid
+      number2:
+        required: true
+        type: numberValid
+    responses:
+      200:
+        body:
+          application/json:
+            type: PhoneDatatype
+            examples:
+              output: !include /Examples/phoneNumberExample.raml  
+      400:
+        description: Invalid Phone Number.
+        
+  post:
+    body: 
+      application/json:
+        type: PhoneDatatype
+        examples:
+          output: !include /Examples/NoPhoneNumberExample.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: "Posted the Numbers but not really"
+        
+  
+            
+              
+            
+          
+
+        
+
+          
+
+          
+        
+       
